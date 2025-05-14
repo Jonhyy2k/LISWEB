@@ -4,33 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LISQUANT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
 </head>
 <body class="bg-white">
-    <div id="landing" class="h-screen flex flex-col items-center justify-center text-center">
-        <h1 id="lis-text" class="text-8xl md:text-9xl font-bold text-black">LIS</h1>
-        <p id="lis-full" class="text-lg md:text-xl text-black mt-4">Lisbon Investment Society</p>
+
+    <header id="page-header" class="fixed top-0 left-0 w-full p-4 md:p-6 z-50 flex justify-between items-center">
+        <div id="header-logo-placeholder" class="font-display-sharper text-lg font-bold text-gray-800 transition-colors duration-500">
+            LISQUANT
+        </div>
+        <nav id="main-nav">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="nav-link text-gray-700 hover:text-bordeaux mr-3 md:mr-4">Account</a>
+                <a href="{{ url_for('logout') }}" class="nav-link text-gray-700 hover:text-bordeaux">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link text-gray-700 hover:text-bordeaux mr-3 md:mr-4">Login</a>
+                <a href="{{ url_for('register') }}" class="nav-link text-gray-700 hover:text-bordeaux">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div id="initial-view" class="h-screen flex flex-col items-center justify-center text-center fixed top-0 left-0 w-full z-20 bg-white opacity-100">
+        <div id="lis-animation-container">
+            <h1 id="lis-text" class="text-black font-display-sharper">LIS</h1>
+        </div>
+        <p id="lis-subtitle" class="text-black text-xl md:text-2xl mt-2 md:mt-4 font-display-sharper">Lisbon Investment Society</p>
     </div>
-    <div id="main-page" class="h-screen bg-bordeaux hidden flex-col items-center justify-center text-center">
-        <h2 id="lis-title" class="text-4xl md:text-5xl text-white opacity-0">Lisbon Investment Society</h2>
-        {% if current_user.is_authenticated %}
-            <form id="ticker-form" action="{{ url_for('analyze') }}" method="POST" class="mt-8 opacity-0">
-                <input type="text" name="ticker" placeholder="Enter Ticker (e.g., AAPL US)" 
-                       class="p-2 rounded text-black w-64 md:w-80" required>
-                <button type="submit" class="mt-4 bg-white text-bordeaux px-6 py-2 rounded hover:bg-gray-200">Analyze</button>
-            </form>
-            <a href="{{ url_for('dashboard') }}" class="mt-4 text-white underline">Go to Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="mt-2 text-white underline">Logout</a>
-        {% else %}
-            <div class="mt-8 opacity-0" id="auth-links">
-                <a href="{{ url_for('login') }}" class="text-white underline">Login</a>
-                <span class="text-white mx-2">|</span>
-                <a href="{{ url_for('register') }}" class="text-white underline">Register</a>
+
+    <div id="main-content-area" class="min-h-screen relative z-10 opacity-0 pt-24 md:pt-32">
+        <div class="fixed top-0 left-0 w-full flex justify-center pt-8 md:pt-10 pb-4 z-30 pointer-events-none">
+            <h2 id="main-title" class="text-white text-3xl md:text-5xl opacity-0 font-display-sharper">Lisbon Investment Society</h2>
+        </div>
+
+        <div id="ticker-input-section" class="flex flex-col items-center justify-center text-center" style="padding-top: 20vh;">
+             <div class="w-full max-w-md px-4 mx-auto">
+                <label for="ticker-input-field" id="ticker-label" class="text-white text-lg md:text-xl mb-3 block">Enter your ticker</label>
+                <input type="text" id="ticker-input-field" name="ticker" placeholder="e.g., AAPL US"
+                       class="p-3 rounded text-black w-full bg-white border border-gray-300 focus:border-bordeaux-dark focus:ring-2 focus:ring-bordeaux-dark" autocomplete="off">
+                <button id="analyze-button" class="mt-6 bg-white text-bordeaux px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors duration-300 font-semibold">Analyze</button>
             </div>
-        {% endif %}
+        </div>
     </div>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] hidden p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <h3 class="text-2xl font-semibold text-bordeaux mb-6 font-display-sharper">Authentication Required</h3>
+            <p class="text-gray-700 mb-6">Please login or register to analyze tickers.</p>
+            <div class="space-y-3">
+                <a href="{{ url_for('login') }}" class="block w-full bg-bordeaux text-white px-6 py-3 rounded-md hover:bg-bordeaux-dark transition-colors duration-300">Login</a>
+                <a href="{{ url_for('register') }}" class="block w-full bg-gray-200 text-bordeaux px-6 py-3 rounded-md hover:bg-gray-300 transition-colors duration-300">Register</a>
+            </div>
+            <button id="close-modal-button" class="mt-6 text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+        </div>
+    </div>
+
+    <div id="scroll-spacer" style="height: 150vh;"></div>
 </body>
 </html>
