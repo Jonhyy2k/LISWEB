@@ -1,31 +1,122 @@
 :root {
     --bordeaux: #4A0E1A;
     --bordeaux-dark: #3A0B14;
-}
-
-.bg-bordeaux {
-    background-color: var(--bordeaux);
-}
-
-.text-bordeaux {
-    color: var(--bordeaux);
-}
-
-.bg-bordeaux-dark {
-    background-color: var(--bordeaux-dark);
+    --white-text: #FFFFFF;
+    --light-cream: #F5F5F5;
+    --font-display: 'Raleway', sans-serif;
+    --font-body: 'Roboto', sans-serif;
 }
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: var(--font-body);
+    background-color: var(--white-text);
+    color: #1a202c; /* Default text color for body */
 }
 
-/* Ensure responsiveness */
+.font-display-sharper {
+    font-family: var(--font-display);
+}
+
+/* Header Styling */
+#page-header {
+    transition: background-color 0.5s ease-in-out;
+}
+#page-header .nav-link {
+    font-family: var(--font-body);
+    font-weight: 500;
+    transition: color 0.3s ease;
+    color: #374151;
+}
+#page-header .nav-link:hover {
+    color: var(--bordeaux);
+}
+#page-header.scrolled .nav-link {
+    color: var(--white-text);
+}
+#page-header.scrolled .nav-link:hover {
+    color: var(--light-cream);
+}
+#page-header #header-logo-placeholder {
+    font-weight: 700;
+    color: #1f2937;
+}
+#page-header.scrolled #header-logo-placeholder {
+    color: var(--white-text);
+}
+
+/* Initial View Styling */
+#initial-view {
+    background-color: var(--white-text);
+    opacity: 1;
+    visibility: visible;
+}
+#lis-animation-container {
+    opacity: 1;
+    visibility: visible;
+}
+#lis-text {
+    font-size: 18vw;
+    font-weight: 800;
+    line-height: 1;
+    color: #1a202c !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+#lis-subtitle {
+    font-weight: 500;
+    color: #2d3748 !important;
+    font-size: 2.5vw;
+    max-font-size: 2rem; /* Corrected property name */
+    opacity: 1 !important;
+    visibility: visible !important;
+    margin-top: 1rem;
+}
+
+/* Main Content Area Styling (Appears after animation) */
+#main-content-area {
+    background-color: transparent;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#main-title {
+    font-weight: 700;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#ticker-input-section {
+    /* This parent div doesn't need opacity/visibility directly handled by CSS here,
+       as its parent #main-content-area is initially hidden.
+       GSAP will animate its children. */
+}
+
+#ticker-label,
+#ticker-input-field,
+#analyze-button {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Modal Styling */
+#auth-modal {
+    /* Styles for auth-modal */
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    #lis-text {
-        font-size: 5rem !important;
-    }
-    #lis-title {
-        font-size: 2rem !important;
-    }
+    #lis-text { font-size: 24vw !important; line-height: 0.95; }
+    #lis-subtitle { font-size: 4vw !important; /* max-font-size can't be used with font-size directly, adjust vw or use clamp() */ }
+    #main-title { font-size: calc(1.3rem + 3vw) !important; }
+    /* other responsive styles */
+}
+
+@media (max-width: 480px) {
+    #lis-text { font-size: 28vw !important; }
+    #lis-subtitle { font-size: 5vw !important; }
+}
+
+#scroll-spacer {
+    visibility: hidden;
 }
