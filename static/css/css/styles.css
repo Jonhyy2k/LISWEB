@@ -1,0 +1,31 @@
+:root {
+    --bordeaux: #4A0E1A;
+    --bordeaux-dark: #3A0B14;
+}
+
+.bg-bordeaux {
+    background-color: var(--bordeaux);
+}
+
+.text-bordeaux {
+    color: var(--bordeaux);
+}
+
+.bg-bordeaux-dark {
+    background-color: var(--bordeaux-dark);
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Ensure responsiveness */
+@media (max-width: 768px) {
+    #lis-text {
+        font-size: 5rem !important;
+    }
+    #lis-title {
+        font-size: 2rem !important;
+    }
+}

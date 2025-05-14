@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LISQUANT</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+</head>
+<body class="bg-white">
+    <div id="landing" class="h-screen flex flex-col items-center justify-center text-center">
+        <h1 id="lis-text" class="text-8xl md:text-9xl font-bold text-black">LIS</h1>
+        <p id="lis-full" class="text-lg md:text-xl text-black mt-4">Lisbon Investment Society</p>
+    </div>
+    <div id="main-page" class="h-screen bg-bordeaux hidden flex-col items-center justify-center text-center">
+        <h2 id="lis-title" class="text-4xl md:text-5xl text-white opacity-0">Lisbon Investment Society</h2>
+        {% if current_user.is_authenticated %}
+            <form id="ticker-form" action="{{ url_for('analyze') }}" method="POST" class="mt-8 opacity-0">
+                <input type="text" name="ticker" placeholder="Enter Ticker (e.g., AAPL US)" 
+                       class="p-2 rounded text-black w-64 md:w-80" required>
+                <button type="submit" class="mt-4 bg-white text-bordeaux px-6 py-2 rounded hover:bg-gray-200">Analyze</button>
+            </form>
+            <a href="{{ url_for('dashboard') }}" class="mt-4 text-white underline">Go to Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="mt-2 text-white underline">Logout</a>
+        {% else %}
+            <div class="mt-8 opacity-0" id="auth-links">
+                <a href="{{ url_for('login') }}" class="text-white underline">Login</a>
+                <span class="text-white mx-2">|</span>
+                <a href="{{ url_for('register') }}" class="text-white underline">Register</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

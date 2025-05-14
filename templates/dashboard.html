@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LISQUANT</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-bordeaux min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl text-white mb-6">Welcome, {{ current_user.username }}</h2>
+        <a href="{{ url_for('logout') }}" class="text-white underline mb-4 inline-block">Logout</a>
+        <h3 class="text-2xl text-white mb-4">Run New Analysis</h3>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="text-red-500 mb-4">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('analyze') }}" method="POST" class="mb-8">
+            <input type="text" name="ticker" placeholder="Enter Ticker (e.g., AAPL US)" 
+                   class="p-2 rounded text-black w-full md:w-64" required>
+            <button type="submit" class="mt-2 md:mt-0 md:ml-2 bg-white text-bordeaux px-6 py-2 rounded hover:bg-gray-200">Analyze</button>
+        </form>
+        <h3 class="text-2xl text-white mb-4">Previous Analyses</h3>
+        {% if analyses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for analysis in analyses %}
+                    <div class="bg-white p-4 rounded shadow">
+                        <p><strong>Ticker:</strong> {{ analysis[1] }}</p>
+                        <p><strong>Date:</strong> {{ analysis[3].strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <a href="{{ url_for('download', analysis_id=analysis[0]) }}" 
+                           class="text-bordeaux underline">Download</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-white">No analyses found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
