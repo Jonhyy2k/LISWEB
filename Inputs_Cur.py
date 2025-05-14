@@ -10,12 +10,6 @@ import os
 import time
 from datetime import datetime
 
-# Currency To USD (maybe)
-overrides = request.getElement("overrides")
-override = overrides.appendElement()
-override.setElement("fieldId", "EQY_FUND_CRNCY")
-override.setElement("value", "USD")
-
 
 def setup_bloomberg_session(ticker_symbol):
     """Initialize Bloomberg API session with detailed logging."""
@@ -36,7 +30,7 @@ def setup_bloomberg_session(ticker_symbol):
     return session
 
 def fetch_bloomberg_data(session, ticker, fields, field_to_name_map, start_year=2014, end_year=2024, timeout=30):
-    """Fetch historical data from Bloomberg with timeout and error handling."""
+    """Fetch historical data from Bloomberg with timeout and error handling, using USD override."""
     if not fields:
         print("[INFO] No fields to fetch in this batch.")
         return {}
@@ -46,15 +40,21 @@ def fetch_bloomberg_data(session, ticker, fields, field_to_name_map, start_year=
     
     ref_data_service = session.getService("//blp/refdata")
     request = ref_data_service.createRequest("HistoricalDataRequest")
-    security = f"{ticker} Equity" 
+    security = f"{ticker}"
     request.getElement("securities").appendValue(security)
     for field in fields:
         request.getElement("fields").appendValue(field)
     request.set("periodicitySelection", "YEARLY")
     request.set("startDate", f"{start_year}0101")
     request.set("endDate", f"{end_year}1231")
+
+    # ✅ USD currency override
+    overrides = request.getElement("overrides")
+    override = overrides.appendElement()
+    override.setElement("fieldId", "EQY_FUND_CRNCY")
+    override.setElement("value", "USD")
     
-    print(f"[DEBUG] Sending request for {security} with fields: {fields}")
+    print(f"[DEBUG] Sending request for {security} with fields: {fields} (currency override: USD)")
     session.sendRequest(request)
     
     data = {field: {} for field in fields}
@@ -69,22 +69,19 @@ def fetch_bloomberg_data(session, ticker, fields, field_to_name_map, start_year=
 
         if event.eventType() in [blpapi.Event.RESPONSE, blpapi.Event.PARTIAL_RESPONSE]:
             for msg in event:
-                print(f"[DEBUG] Raw Bloomberg response message: {msg}")  # Log raw response for debugging
+                print(f"[DEBUG] Raw Bloomberg response message: {msg}")
                 if msg.hasElement("responseError"):
                     error = msg.getElement("responseError")
                     error_message = error.getElement("message").getValue()
                     print(f"[ERROR] Bloomberg API error for {security}: {error_message}")
                     continue
 
-                # FIXED SECTION: Handle securityData differently
                 if not msg.hasElement("securityData"):
                     print(f"[WARNING] No securityData element in response for {security}.")
                     continue
                 
-                # securityData is not an array but a complex element - handle differently
                 security_data = msg.getElement("securityData")
-                
-                # Handle field exceptions
+
                 if security_data.hasElement("fieldExceptions"):
                     field_exceptions = security_data.getElement("fieldExceptions")
                     for j in range(field_exceptions.numValues()):
@@ -96,23 +93,19 @@ def fetch_bloomberg_data(session, ticker, fields, field_to_name_map, start_year=
                         if invalid_field_id not in invalid_fields:
                             invalid_fields.append(invalid_field_id)
                 
-                # Check if fieldData exists 
                 if not security_data.hasElement("fieldData"):
                     print(f"[WARNING] No fieldData element in securityData for {security}.")
                     continue
 
-                # Process the fieldData array
                 field_data_array = security_data.getElement("fieldData")
                 print(f"[DEBUG] Number of fieldData entries: {field_data_array.numValues()}")
                 
                 for k in range(field_data_array.numValues()):
                     datum = field_data_array.getValue(k)
-                    # Extract the date and convert to year
                     date_obj = datum.getElement("date").getValueAsDatetime()
                     year = date_obj.year
                     print(f"[DEBUG] Processing data for year {year}: {datum}")
                     
-                    # Loop through each field and extract values
                     for field_id in fields:
                         if field_id in invalid_fields:
                             data[field_id][year] = "N/A (Invalid Field)"
