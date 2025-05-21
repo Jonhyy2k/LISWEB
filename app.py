@@ -12,11 +12,11 @@ app.secret_key = os.urandom(24)
 
 # Database configuration
 DB_CONFIG = {
-    'dbname': 'lisquant_db',
-    'user': 'postgres',
-    'password': 'your_password',
-    'host': 'localhost',
-    'port': '5432'
+    'dbname': os.environ.get('DB_NAME', 'lisquant_db'),
+    'user': os.environ.get('DB_USER', 'postgres'),
+    'password': os.environ.get('DB_PASSWORD'),
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'port': os.environ.get('DB_PORT', '5432')
 }
 
 # Initialize Flask-Login
@@ -124,8 +124,17 @@ def analyze():
     output_filename = f"{ticker}_Valuation_Model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     output_path = os.path.join(output_dir, output_filename)
 
+    if not os.path.exists(template_path):
+        flash("Critical error: The template file 'LIS_Valuation_Empty.xlsx' is missing. Analysis cannot proceed.")
+        return redirect(url_for('dashboard'))
+
     try:
         populate_valuation_model(template_path, output_path, ticker)
+
+        if not os.path.exists(output_path):
+            flash("Data population failed. The output Excel file could not be generated.")
+            return redirect(url_for('dashboard'))
+
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("INSERT INTO analyses (user_id, ticker, filename, created_at) VALUES (%s, %s, %s, %s)",
