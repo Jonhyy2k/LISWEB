@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, send_file, flash
+from flask import Flask, request, render_template, redirect, url_for, send_file, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
@@ -165,6 +165,10 @@ def download(analysis_id):
     else:
         flash('Analysis not found or access denied')
     return redirect(url_for('dashboard'))
+
+@app.route('/check_auth')
+def check_auth():
+    return jsonify({'authenticated': current_user.is_authenticated})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
