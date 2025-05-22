@@ -10,6 +10,8 @@ from Inputs_Cur import populate_valuation_model  # Import your function
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+#psql -U your_postgres_user -h localhost -f init_db.sql
+
 # Database configuration
 DB_CONFIG = {
     'dbname': os.environ.get('DB_NAME', 'lisquant_db'),
